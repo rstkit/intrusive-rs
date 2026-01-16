@@ -25,9 +25,6 @@ use crate::singly_linked_list::SinglyLinkedListOps;
 use crate::xor_linked_list::XorLinkedListOps;
 use crate::Adapter;
 use crate::KeyAdapter;
-// Necessary for Rust 1.56 compatability
-#[allow(unused_imports)]
-use crate::unchecked_option::UncheckedOptionExt;
 
 // =============================================================================
 // RBTreeOps
@@ -2043,7 +2040,7 @@ where
     /// Panics if the new element is already linked to a different intrusive
     /// collection.
     #[inline]
-    pub fn insert<'a>(&'a mut self, val: <A::PointerOps as PointerOps>::Pointer) -> CursorMut<'_, A>
+    pub fn insert<'a>(&'a mut self, val: <A::PointerOps as PointerOps>::Pointer) -> CursorMut<'a, A>
     where
         <A as KeyAdapter<'a>>::Key: Ord,
     {
@@ -2550,7 +2547,7 @@ mod tests {
             write!(f, "{}", self.value)
         }
     }
-    intrusive_adapter!(RcObjAdapter = Rc<Obj>: Obj { link: Link });
+    intrusive_adapter!(RcObjAdapter = Rc<Obj>: Obj { link => Link });
 
     impl<'a> KeyAdapter<'a> for RcObjAdapter {
         type Key = i32;
@@ -2559,7 +2556,7 @@ mod tests {
         }
     }
 
-    intrusive_adapter!(UnsafeRefObjAdapter = UnsafeRef<Obj>: Obj { link: Link });
+    intrusive_adapter!(UnsafeRefObjAdapter = UnsafeRef<Obj>: Obj { link => Link });
 
     impl<'a> KeyAdapter<'a> for UnsafeRefObjAdapter {
         type Key = i32;
@@ -3291,7 +3288,7 @@ mod tests {
             link: Link,
             value: &'a T,
         }
-        intrusive_adapter!(RcObjAdapter<'a, T> = &'a Obj<'a, T>: Obj<'a, T> {link: Link} where T: 'a);
+        intrusive_adapter!(RcObjAdapter<'a, T> = &'a Obj<'a, T>: Obj<'a, T> {link => Link} where T: 'a);
         impl<'a, 'b, T: 'a + 'b> KeyAdapter<'a> for RcObjAdapter<'b, T> {
             type Key = &'a T;
             fn get_key(&self, value: &'a Obj<'b, T>) -> &'a T {
@@ -3321,7 +3318,7 @@ mod tests {
                 link: Link,
                 value: usize,
             }
-            intrusive_adapter!(RcObjAdapter = $ptr<Obj>: Obj { link: Link });
+            intrusive_adapter!(RcObjAdapter = $ptr<Obj>: Obj { link => Link });
             impl<'a> KeyAdapter<'a> for RcObjAdapter {
                 type Key = usize;
                 fn get_key(&self, value: &'a Obj) -> usize {
